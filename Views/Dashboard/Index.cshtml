@@ -1,0 +1,288 @@
+@{
+    ViewData["Title"] = "Genel Bakış";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-body bg-light rounded">
+                <form asp-action="Index" method="get" class="row row-cols-lg-auto g-3 align-items-center">
+                    
+                    <div class="col-12">
+                        <label class="visually-hidden" for="filtreTarih">Tarih</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-calendar-days"></i></span>
+                            <input type="month" class="form-control" name="filtreTarih" value="@ViewBag.SecilenTarih">
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="visually-hidden" for="filtreKategoriId">Kategori</label>
+                        <select class="form-select" name="filtreKategoriId" asp-items="ViewBag.Kategoriler">
+                            <option value="0">Tüm Kategoriler</option> </select>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-filter"></i> Filtrele
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Temizle</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-md-4 mb-3 mb-md-0">
+        <div class="d-flex flex-row widget-summary bg-success bg-opacity-10 p-3 rounded align-items-center h-100 border border-success border-opacity-25">
+            <div class="icon fs-1 text-success me-3">
+                <i class="fa-solid fa-sack-dollar"></i>
+            </div>
+            <div>
+                <h6 class="text-muted text-uppercase mb-1">Gelir</h6>
+                <h4 class="fw-bold text-success mb-0">@ViewBag.ToplamGelir</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3 mb-md-0">
+        <div class="d-flex flex-row widget-summary bg-danger bg-opacity-10 p-3 rounded align-items-center h-100 border border-danger border-opacity-25">
+            <div class="icon fs-1 text-danger me-3">
+                <i class="fa-solid fa-credit-card"></i>
+            </div>
+            <div>
+                <h6 class="text-muted text-uppercase mb-1">Gider</h6>
+                <h4 class="fw-bold text-danger mb-0">@ViewBag.ToplamGider</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="d-flex flex-row widget-summary bg-primary bg-opacity-10 p-3 rounded align-items-center h-100 border border-primary border-opacity-25">
+            <div class="icon fs-1 text-primary me-3">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <div>
+                <h6 class="text-muted text-uppercase mb-1">Bakiye</h6>
+                <h4 class="fw-bold text-primary mb-0">@ViewBag.Bakiye</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-bold bg-white">
+                💸 Kategori Dağılımı
+            </div>
+            <div class="card-body d-flex justify-content-center align-items-center">
+                @if (ViewBag.DoughnutData == "[]")
+                {
+                    <div class="text-muted small text-center">Bu dönem için gider verisi yok.</div>
+                }
+                else
+                {
+                    <canvas id="doughnutChart" style="max-height:250px"></canvas>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-bold bg-white">
+                📈 Haftalık Akış (Ayın Haftaları)
+            </div>
+            <div class="card-body">
+                <canvas id="splineChart" style="max-height:300px"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BAR CHART: Aylık Gelir/Gider Karşılaştırması -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold bg-white">
+                📊 Aylık Gelir/Gider Karşılaştırması (Son 6 Ay)
+            </div>
+            <div class="card-body">
+                <canvas id="barChart" style="max-height:350px"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // --- 1. DOUGHNUT CHART ---
+    // Veri yoksa hata vermemesi için kontrol
+    const doughnutCanvas = document.getElementById('doughnutChart');
+    if (doughnutCanvas) {
+        new Chart(doughnutCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(ViewBag.DoughnutLabels),
+                datasets: [{
+                    data: @Html.Raw(ViewBag.DoughnutData),
+                    backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff', '#ff9f40'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(context.parsed);
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- 2. SPLINE CHART ---
+    const splineCanvas = document.getElementById('splineChart');
+    if(splineCanvas){
+        new Chart(splineCanvas, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(ViewBag.SplineAxisX), // Günler (1, 2, 3...)
+                datasets: [
+                    {
+                        label: 'Gelir',
+                        data: @Html.Raw(ViewBag.SplineIncome),
+                        borderColor: '#198754',
+                        backgroundColor: '#198754',
+                        tension: 0.3,
+                        pointRadius: 2
+                    },
+                    {
+                        label: 'Gider',
+                        data: @Html.Raw(ViewBag.SplineExpense),
+                        borderColor: '#dc3545',
+                        backgroundColor: '#dc3545',
+                        tension: 0.3,
+                        pointRadius: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    y: { beginAtZero: true },
+                    x: { grid: { display: false } } // Dikey çizgileri kaldırır, daha temiz görünür
+                }
+            }
+        });
+    }
+
+    // --- 3. BAR CHART ---
+    const barCanvas = document.getElementById('barChart');
+    if (barCanvas) {
+        new Chart(barCanvas, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(ViewBag.BarLabels),
+                datasets: [
+                    {
+                        label: 'Gelir',
+                        data: @Html.Raw(ViewBag.BarIncomes),
+                        backgroundColor: '#198754',
+                        borderColor: '#198754',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Gider',
+                        data: @Html.Raw(ViewBag.BarExpenses),
+                        backgroundColor: '#dc3545',
+                        borderColor: '#dc3545',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(context.parsed.y);
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+</script>
+
+<!-- KATEGORİ BAZLI HARCAMA ÖZETİ -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> En Çok Harcama Yapılan Kategoriler (Top 5)</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.TopKategoriler != null && ViewBag.TopKategoriler.Count > 0)
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Kategori</th>
+                                    <th class="text-end">Toplam Tutar</th>
+                                    <th class="text-end">Yüzde</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var kategori in ViewBag.TopKategoriler)
+                                {
+                                    <tr>
+                                        <td>@kategori.Baslik</td>
+                                        <td class="text-end fw-bold">@kategori.Tutar.ToString("C0")</td>
+                                        <td class="text-end">
+                                            @if (ViewBag.ToplamGiderDecimal != null && (decimal)ViewBag.ToplamGiderDecimal > 0)
+                                            {
+                                                var yuzde = (kategori.Tutar / (decimal)ViewBag.ToplamGiderDecimal) * 100;
+                                                <span class="badge bg-secondary">@yuzde.ToString("F1")%</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Bu dönemde harcama verisi bulunmuyor.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

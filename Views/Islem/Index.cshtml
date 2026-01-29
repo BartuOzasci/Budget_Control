@@ -1,0 +1,71 @@
+@model IEnumerable<ButceTakip.Models.Islem>
+
+@{
+    ViewData["Title"] = "İşlemler";
+}
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <h3>📄 İşlem Hareketleri</h3>
+    </div>
+    <div class="col-md-6 text-end">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Yeni İşlem Ekle
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Kategori</th>
+                    <th>Açıklama</th>
+                    <th>Tarih</th>
+                    <th>Tutar</th>
+                    <th class="text-end">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var group in Model.GroupBy(x => new { x.Tarih.Year, x.Tarih.Month }).OrderByDescending(g => g.Key.Year).ThenByDescending(g => g.Key.Month))
+                {
+                    <tr class="table-secondary">
+                        <td colspan="5" class="fw-bold text-center">
+                            @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(group.Key.Month) @group.Key.Year
+                        </td>
+                    </tr>
+                    foreach (var item in group.OrderByDescending(x => x.Tarih))
+                    {
+                        // Satır rengi ve işaret belirleme
+                        var renk = item.Kategori?.Tur == "Gelir" ? "text-success" : "text-danger";
+                        var isaret = item.Kategori?.Tur == "Gelir" ? "+" : "-";
+
+                        <tr>
+                            <td>
+                                @if (item.Kategori != null)
+                                {
+                                    <span class="fs-5">@item.Kategori.Ikon</span> @item.Kategori.Baslik
+                                }
+                                else
+                                {
+                                    <text><span class="fs-5">❓</span> Bilinmeyen Kategori</text>
+                                }
+                            </td>
+                            <td>@item.Aciklama</td>
+                            <td>@item.Tarih.ToString("dd.MM.yyyy")</td>
+                            <td class="@renk fw-bold">
+                                @isaret @item.Tutar.ToString("N2") ₺
+                            </td>
+                            <td class="text-end">
+                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" onclick="return confirm('Silmek istiyor musun?');">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

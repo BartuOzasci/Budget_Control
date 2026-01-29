@@ -1,0 +1,46 @@
+# Binaries and build outputs
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# User-specific files
+.vscode/
+*.user
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# NuGet packages
+packages/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Core
+wwwroot/lib/
+
+# Entity Framework
+Migrations/*.Designer.cs
+Migrations/*.cs
+
+# Temporary files
+*.tmp
+*.temp

@@ -1,0 +1,41 @@
+@model ButceTakip.Models.Kategori
+
+@{
+    ViewData["Title"] = "Yeni Kategori";
+}
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Yeni Kategori Ekle</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create">
+                    
+                    <div class="mb-4 text-center">
+                        <label class="form-label d-block text-muted small">Kategori Türü</label>
+                        <div class="btn-group w-50" role="group">
+                            <input type="radio" class="btn-check" name="Tur" id="radioGider" value="Gider" checked autocomplete="off">
+                            <label class="btn btn-outline-danger" for="radioGider">💳 Gider</label>
+
+                            <input type="radio" class="btn-check" name="Tur" id="radioGelir" value="Gelir" autocomplete="off">
+                            <label class="btn btn-outline-success" for="radioGelir">💰 Gelir</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Baslik" class="form-label">Kategori Adı</label>
+                        <input asp-for="Baslik" class="form-control form-control-lg" placeholder="Örn: Market, Maaş, Kira..." />
+                        <span asp-validation-for="Baslik" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Kaydet</button>
+                        <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
