@@ -24,22 +24,26 @@ Modern ve kullanıcı dostu bir kişisel bütçe takip uygulaması. Gelir ve gid
    - Visual Studio Code veya Visual Studio
 
 2. **Projeyi Klonlayın**:
+
    ```bash
    git clone <repository-url>
    cd ButceTakip
    ```
 
 3. **Bağımlılıkları Yükleyin**:
+
    ```bash
    dotnet restore
    ```
 
 4. **Veritabanını Oluşturun**:
+
    ```bash
    dotnet ef database update
    ```
 
 5. **Uygulamayı Çalıştırın**:
+
    ```bash
    dotnet run
    ```
@@ -47,23 +51,49 @@ Modern ve kullanıcı dostu bir kişisel bütçe takip uygulaması. Gelir ve gid
 6. **Tarayıcıda Açın**:
    - http://localhost:5074
 
+## Executable ile Çalıştırma (Terminal ve VS Code Gerekmeden)
+
+Proje, .NET SDK'sız çalıştırılabilecek bağımsız executable olarak publish edilebilir.
+
+1. **Publish Edin**:
+
+   ```bash
+   dotnet publish -c Release -r win-x64 --self-contained true
+   ```
+
+2. **Çıktıyı Bulun**:
+   - `bin\Release\net10.0\win-x64\publish\`
+
+3. **Executable'yi Çalıştırın**:
+   - `ButceTakip.exe` dosyasını çift tıklayarak çalıştırın
+   - Uygulama otomatik olarak tarayıcıda açılır
+
+4. **Başka Bilgisayara Taşıma**:
+   - Tüm `publish` klasörünü zipleyin ve hedef bilgisayara taşıyın
+   - .NET SDK yüklemeye gerek yoktur, tüm bağımlılıklar dahil edilmiştir
+   - **Veritabanını Dahil Etmek İçin**: `ButceTakip.db` dosyasını `publish` klasörüne kopyalayın (`cp ButceTakip.db bin/Release/net10.0/win-x64/publish/`)
+
 ## Kullanım
 
 ### Ana Sayfa
+
 - Hoşgeldin mesajı ve typewriter efekti
 - Modern navbar ve sidebar menü
 
 ### Genel Bakış
+
 - Aylık gelir/gider özeti
 - Kategori bazlı harcama grafikleri
 - Tarih ve kategori filtreleme
 
 ### İşlem Hareketleri
+
 - Tüm gelir/gider kayıtları
 - Ay bazlı gruplandırma
 - Filtreleme ve sıralama
 
 ### Kategori Yönetimi
+
 - Gelir ve gider kategorilerini ayrı bölümlerde görüntüleme
 - Yeni kategori ekleme
 
